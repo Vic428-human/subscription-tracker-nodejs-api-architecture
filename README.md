@@ -1,3 +1,11 @@
+# 前言
+
+前端太卷了，在將來，即便不專精後端技術，前端人員還是要有一定的後端 API 規劃能力，
+所以該專案，是我用來熟悉後端 API 規劃的一個項目，但更新頻率不會太高，
+主要還是會把重心放在前端的 side project，所以此專案更新較為隨意。
+
+此專案啟用時間為 2025/5 月下旬，與此同時在進行的 side project 為[TanStack Query + Typescript + TailwindCSS 項目](https://github.com/Vic428-human/weather-app)
+
 ### 一開始製作專案的時候啟用的 express skelton
 
 https://expressjs.com/en/starter/generator.html
