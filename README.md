@@ -15,6 +15,16 @@ node -v => 18
 npx express-generator --no-view --git ./
 ```
 
+### 專案更新進度
+
+- 下一階段預計規劃 db，採用 mongodb => implementing functionality to store and retrieve descriptions
+- 0525 規劃 users/subscriptions/auth 可能需要用的 API 方法調用
+
+### 此專案配合的 API 測試平台
+
+使用的是 httpie
+理由： 輕量，沒有 postman 這麼複雜
+
 ### 自動刷新 nodejs server
 
 automatically restarting the node application when file changes in the directory are detected.
