@@ -20,7 +20,6 @@ app.use('/api/v1/subscriptions', subscriptionRouter)
 // ex: /api/v1/auth/sign-up
 app.use('/api/v1/auth', authRouter)
 
-// you can make a requests using the browser, because when searching for a website a browser automativally make a get request and ouput
 
 app.get('/', (req, res) => {
     res.send('welcome to the subscription tracker api!')
