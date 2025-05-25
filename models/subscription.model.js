@@ -62,12 +62,17 @@ subscriptionSchema.pre('save', function(next) {
     this.renewalDate.setDate(this.startDate.getDate() + renewalPeriods[this.frequency]);
 
     }
-
+    // 如果續訂日期過期 => 今天日期大於續訂日期
+    if (this.renewalDate < new Date()) {
+      this.status = 'expired';
+    }
+    next();
   });
 
 
-
-export default mongoose.model('Subscription', subscriptionSchema);
+const Subscription = mongoose.model('Subscription', subscriptionSchema);
+ 
+export default Subscription
 
 // {
 //   "_id": ObjectId("6652f1e5b2c4a3f8e6a1d2c3"),
