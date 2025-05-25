@@ -12,7 +12,16 @@ const errorMiddleware = (err, req, res, next) => {
             error.statusCode = 404;
         }
 
-        // 
+        // Mongoose duplicate key
+        // ex: {"name":"MongoError","code":11000,"err":"insertDocument :: caused by :: 11000 E11000 duplicate key error index: mydb.users.$email_1  dup key: { : null }"} 
+        // => The error message is saying that there's already a record with null as the email.
+        // => 例如： _id 1 : alice@email.com 跟 _id 3 : alice@email.com ，這兩個的值重複了，這時候可以把 3的那一筆刪除
+        // => 或者， _id 4 : null, _id 5 : null, 這兩個的值重複了，這時候可以把 5的那一筆刪除
+        if (err.code === 11000) {  // 了解更多 查看 A-2
+            const message = 'Duplicate field value entered';
+            error = new Error(message);
+            error.statusCode = 400;
+        }
     }catch(err){
        
         next(err)
@@ -42,3 +51,12 @@ export default errorMiddleware
  
 // 插入评论，這時候會失敗跳出 CastError 錯誤訊息，原因是 传入的 Date.now 是一个函数
 // const data = await Article.findByIdAndUpdate({ '_id': id }, { $push: { comment } }, { new: true });
+
+// A-2 11000 情境：
+// Drop the collection => db.users.drop();
+
+// Find the document which has that value and delete it. Let's say the value was null, you can delete it using:
+// db.users.remove({ email_address: null });
+
+// Drop the Unique index: (這個要留意，除非你今天的數據是允許出現重複的)
+// db.users.dropIndex(indexName)
