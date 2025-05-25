@@ -16,7 +16,7 @@ const userSchema = new Schema({
   // contact@exampel.com => sring@sring.sring => 不過這種判斷方式就比較單純
   email: { type: String, trim: true, unique: true, lowercase: true, minlength: 5,maxlength: 255, required: [true, 'User email is required'], 
     // TODO: 有時間實驗 validate 跟 match 各自只使用其中一種的狀況
-    validate: [validateEmail, 'Please fill a valid email address'], // 不透過regex方式，其實可以註解      
+    validate: [validateEmail, 'Please fill a valid email address'], // 不透過regex方式，其實可以註解，而是透過某個條件判斷是true還是false      
     match: [/\S+@\S+\.\S+/, 'Please fill a valid email address'] // 必須用regex方式
   },
   password: { type: String, minlength: 5,  required: [true, 'User password is required'] },
@@ -25,7 +25,9 @@ const userSchema = new Schema({
 // createdAt: a date representing when this document was created
 // updatedAt: a date representing when this document was last updated
 
-export default mongoose.model('User', userSchema); // 假裝是 User
+const User = mongoose.model('User', userSchema); 
+
+export default User
 
 // 之後調用如下
 // let doc = await User.create({ name: 'test', email: 'test', password: 'test' });
