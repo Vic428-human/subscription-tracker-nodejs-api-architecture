@@ -28,7 +28,7 @@ const subscriptionSchema = new Schema({
         validate: {
             validator: function(value) {
                 return value > this.startDate
-            }, // check if the start date is after the current date
+            }, // check if the renewal date is after the start date
             message: 'renewal date must be in the future'
          },
      default: Date.now 
