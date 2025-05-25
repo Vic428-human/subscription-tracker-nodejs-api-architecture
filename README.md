@@ -22,7 +22,12 @@ npx express-generator --no-view --git ./
 
 ### DB
 
-- mongodb Atlas
+- [mongoos v8 schema 常用文檔](<https://mongoosejs.com/docs/api/schemastring.html#SchemaString.prototype.trim()>)
+- 常見的 shema spec 註解都寫在這裡了，例如 trim match validate timestamp 這些
+
+```
+models/user.model.js
+```
 
 ### 此專案配合的 API 測試平台
 
