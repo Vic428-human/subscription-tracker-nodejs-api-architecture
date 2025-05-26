@@ -8,4 +8,4 @@ dotenv.config({
 });
 
 // process.env 抓取的就是 .env 或是 .env.development.local 這類的環境變數
-export const { PORT, NODE_ENV, DB_URL } = process.env;
+export const { PORT, NODE_ENV, DB_URL, JWRT_SECRET, JWT_EXPIRES_IN } = process.env;
