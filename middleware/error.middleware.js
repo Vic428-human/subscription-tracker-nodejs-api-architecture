@@ -10,6 +10,15 @@ const errorMiddleware = (err, req, res, next) => {
             const message  = 'Resource not found，或檢查推送的數據是否格式上跟schema有出入';
             error = new Error(message); 
             error.statusCode = 404;
+
+
+            // new Error(message) 執行後的假數據回傳結果:
+            // {
+            //     name: 'CastError or something else',
+            //     message: 'Resource not found，或檢查推送的數據是否格式上跟schema有出入',
+            //     statusCode: 404,
+            //     stack: 'Error: Resource not found，或檢查推送的數據是否格式上跟schema有出入\n    at ...'
+            // }
         }
 
         // Mongoose duplicate key
@@ -22,6 +31,22 @@ const errorMiddleware = (err, req, res, next) => {
             error = new Error(message);
             error.statusCode = 400;
         }
+
+        //  Mongoose validation error
+        // message: "Username is required. Email is invalid"
+        if(err.name === 'ValidationError'){ //了解更多 查看 A-3
+            const message = Object.values(err.errors).map(el => el.message).join(', ');
+            error = new Error(message);
+            error.statusCode = 400;
+        }
+
+        // Sets the HTTP status for the response. It is a chainable alias of Node’s => https://stackoverflow.com/questions/50888305/res-status-vs-res-statuscode
+        res.status(error.statusCode || 500).json({ // The res.json() function sends a JSON response => https://www.geeksforgeeks.org/express-js-res-json-function/
+            success: false,
+            error: error.message || 'Server Error'
+            
+        })
+
     }catch(err){
        
         next(err)
@@ -60,3 +85,24 @@ export default errorMiddleware
 
 // Drop the Unique index: (這個要留意，除非你今天的數據是允許出現重複的)
 // db.users.dropIndex(indexName)
+
+
+//  A-3 情境：
+// const err = {
+//   name: 'ValidationError',
+//   errors: {
+//     username: {
+//       message: 'Username is required',
+//       name: 'ValidatorError',
+//       path: 'username',
+//       value: ''
+//     },
+//     email: {
+//       message: 'Email is invalid',
+//       name: 'ValidatorError',
+//       path: 'email',
+//       value: 'not-an-email'
+//     }
+//   }
+// };
+
