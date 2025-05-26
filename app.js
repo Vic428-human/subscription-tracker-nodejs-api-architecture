@@ -20,7 +20,7 @@ app.use(express.json())
 // 至於為什麼設定true，是因為考量到前端也有可能傳巢狀結構回來
 app.use(express.urlencoded({ extended: true }))
 // `cookie-parser` 會把請求中的 Cookie 解析成一個對象，儲存在 `req.cookies` 中。可以透過造訪 `req.cookies` 來取得 Cookie 的值。
-app.use(cookieParser)
+app.use(cookieParser())
 
 // ex: /api/v1/users/ => or which routes you want to use
 app.use('/api/v1/users', userRouter)
