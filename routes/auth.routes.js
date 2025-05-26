@@ -2,8 +2,16 @@ import { Router } from 'express';
 
 const authRouter = Router(); 
 
-authRouter.post('sign-up' , (req, res) => res.send({title:'sign-up'}));
-authRouter.post('sign-in' , (req, res) => res.send({title:'sign-in'}));
-authRouter.post('sign-out' , (req, res) => res.send({title:'sign-out'}));
+// ex: /api/v1/auth/sign-up
+authRouter.post('/sign-up' , (req, res) => {
+    // 這邊會放 handler，處理重複且相同的邏輯
+    res.send({title:'sign-up'})
+});
+authRouter.post('/sign-in' , (req, res) => res.send({title:'sign-in'}));
+authRouter.post('/sign-out' , (req, res) => res.send({title:'sign-out'}));
 
 export default authRouter;
+
+// handler，處理重複且相同的邏輯
+// 我們未來會有多個routes，如果每次都寫相同的 handler 去處理類似的事情，這個檔案的代碼會變得
+// 很臃腫，所以要另外獨立出一份 controller 去減輕臃腫問題
