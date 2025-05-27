@@ -1,38 +1,44 @@
 
 import mongoose from 'mongoose';
 import User from '../models/user.model.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { JWT_SECRET, JWT_EXPIRES_IN } from '../config/env.js';
 
 export const signUp = async (req, res, next ) => {
-    // mongoose session is nothing to do with user session 
-    // 事务必须具备四大特性：原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）和持久性（Durability），简称ACID
-    // atomic operations => 不可分割的更新操作。 它保證在多執行緒環境下，對共享資源的更新是安全的，不會發生競爭狀態（race condition）。
-    // Insert either workd or don't
-    // Update either work or don't
-    // never get half n operation 
+    // 基於ACID 特性 不會發生競爭狀態（race condition）。
+    // mongoose 的 session 作法，就能達到這個效果
     // 用於避免將錯誤的操作輸入給數據庫，讓開發人員可以即時知道錯誤的問題點
-    // Using Mongoose's default connection
     const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-        session.startTransaction();
+        const {name, email, password} = req.body
+        console.log('email===>', email)
+        // 確認使用者是否存在
+        const existingUser = await User.findOne({email})
+        console.log('existingUser', existingUser)
+        if(existingUser){
+            const error =  new Error('User already exist')
+            error.statusCode = 409; // 您修改要求的操作會導致伺服器的資源出現一種不可能或不一致的狀態。例如您嘗試修改某個使用者的使用者名，然後該使用者名稱與其他使用者名稱有衝突。
+            throw error
+        }
+        // 使用者不存在 => 可以創建新的User，但密碼要記得採加鹽加密法
+        // BCrypt比MD5更安全，因為它會自動幫每個密碼隨機加鹽並把鹽混在密碼裡，不需要額外存鹽值，也更難被破解。
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Step 1: Create a new user based on model
-        const user = await User.create(
-            [
-                {
-                    name: 'John Wick',
-                    email: 'john.wick@example.com',
-                },
-            ],
-            { session } // Include session for transaction
-        );
+        // session 放在第二個參數的用意 => 表示如果等下 abortTransaction ，User就不會被成功創建，能避免錯誤資料inser到DB裡
+        const newUsers = await User.create([{name, email, password: hashedPassword}], {session});
 
-
-        // 将操作所做的更改保存在多文档事务中并结束该事务。
+        // JWT 通常用來驗證使用者身份，並授予使用者特定的權限或資源。
+        // 備註： Expected "payload" to be a plain object. 之前寫成傳字串過去，所以在這debug了一段時間
+        const token = jwt.sign({userId: newUsers[0]._id}, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN}); // https://www.npmjs.com/package/jsonwebtoken
         await session.commitTransaction();
-        console.log("commitTransaction => 将操作所做的更改保存在多文档事务中并结束该事务。");
 
-        // Commit the transaction
-        console.log('Transaction successful: Customer and Billing Address created.');
+        // 所以之後前端會收到帶有 jwt的token(用來驗證使用者身份)，表示之前有成功登入過，下次前端要登入，就拿這個token來驗證
+        res.status(201).json({success: true, message: 'User create successfully', date: {token, user: newUsers[0]} });
+
     } catch (error) {
         // Rollback the transaction in case of an error
         await session.abortTransaction();
@@ -49,34 +55,40 @@ export const signIn = (req, res, next)=> {
 export const signOut = (req, res, next)=> {    
 }
 
-// const conn = require("../models/connection"); 
+// await Model.create => 回傳結果參考
+// {
+//   "_id": "6655e1b8b4e8a123456789ab",
+//   "name": "Alice",
+//   "email": "alice@example.com",
+//   "__v": 0
+// }
 
 
-// // 參考這篇 => https://onthor.medium.com/understanding-mongoose-transactions-and-rollbacks-f074078ff604
-// // const example = async () => {
-// //     const session = await conn.startSession();
+// API 與 mongoose 交互 => https://onthor.medium.com/understanding-mongoose-transactions-and-rollbacks-f074078ff604
+// const example = async () => {
+//      const session = await mongoose.startSession();
+//      
+//     try {
+//         session.startTransaction();  
 
-// //     try {
-// //         session.startTransaction();  
+//         await Model.create([{ /* payload */ }], { session });
 
-// //         await Model.create([{ /* payload */ }], { session });
+//         await Model.deleteOne({ /* conditions */ }, { session });
 
-// //         await Model.deleteOne({ /* conditions */ }, { session });
+//         await Model.updateOne({ /* conditions */ }, { /* payload */ }, { session } );
 
-// //         await Model.updateOne({ /* conditions */ }, { /* payload */ }, { session } );
+//         await Model.findByIdAndUpdate(_id, { /* payload */  }, { session });
 
-// //         await Model.findByIdAndUpdate(_id, { /* payload */  }, { session });
-
-// //         const user = new Model( /* payload */);
-// //         await user.save({ session });
+//         const user = new Model( /* payload */);
+//         await user.save({ session });
         
-// //         await session.commitTransaction();
-         
-// //     } catch (error) { 
-// //         await session.abortTransaction();
-// //     }
-// //     session.endSession();
-// // }
+//         await session.commitTransaction();
+        
+//     } catch (error) { 
+//         await session.abortTransaction();
+//     }
+//     session.endSession();
+// }
 
 
 // // startSession(): Initiates a session.
